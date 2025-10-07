@@ -1,8 +1,12 @@
 import h5py
 import os
 import sys
-import open3d
+import open3d as o3d
 import numpy as np
+import random
+import argparse
+
+from util import *
 
 
 def h5pyToList(filename: str) -> list:
@@ -53,29 +57,34 @@ def readTrajectoryFile(filename: str) -> list[np.array]:
     return matrices
 
 
-def listToObj(points: list, outputFilename: str) -> None:
-    """
-    Takes in a Python list and writes it to a .obj file.
-    """
-    with open(outputFilename, "w") as f:
-        for vertex in points:
-            f.write(f"v {' '.join(map(str, vertex))}\n")
-    print(f"Data written to {outputFilename}")
-
-
 if __name__ == "__main__":
-    # Read and verify command line arguments
-    if len(sys.argv) not in [3, 4]:
-        print(
-            "Usage: python converter.py <hdf5 filename> <output obj filename> [trajectory filename]"
-        )
-        sys.exit(1)
-    inputFilename = sys.argv[1]
-    outputFilename = sys.argv[2]
+    # # Read and verify command line arguments
+    # if len(sys.argv) not in [3, 4]:
+    #     print(
+    #         "Usage: python hdf5_to_pc.py <hdf5 filename> <output obj filename> [trajectory filename]"
+    #     )
+    #     sys.exit(1)
+    # inputFilename = sys.argv[1]
+    # outputFilename = sys.argv[2]
 
-    if not os.path.isfile(inputFilename):
-        print(f"File not found: {inputFilename}")
-        sys.exit(1)
+    # if not os.path.isfile(inputFilename):
+    #     print(f"File not found: {inputFilename}")
+    #     sys.exit(1)
+
+    parser = argparse.ArgumentParser(description="Converts meshes to point clouds.")
+    parser.add_argument("-i", "--input", required=True, help="input mesh file name")
+    parser.add_argument("-o", "--output", required=True, help="output obj file name")
+    parser.add_argument("-t", "--trajectory", help="trajectory log file name")
+    parser.add_argument(
+        "-r",
+        "--rate",
+        help="rate at which to randomly sample points",
+        default=0.01,
+        type=float,
+    )
+    args = parser.parse_args()
+    inputFilename = args.input
+    outputFilename = args.output
 
     # Convert HDF5 to list and then to OBJ
     print(f"Reading {inputFilename} and converting to point cloud list...")
@@ -84,14 +93,14 @@ if __name__ == "__main__":
 
     doTransform = False
     trajectoryMatrices = []
-    if len(sys.argv) == 4:
-        trajectoryFilename = sys.argv[3]
-        print(f"Reading trajectory file {trajectoryFilename}...")
-        trajectoryMatrices = readTrajectoryFile(trajectoryFilename)
-        print(f"Number of trajectory matrices in file: {len(trajectoryMatrices)}")
-        doTransform = True
-    else:
-        print("No trajectory file provided, skipping transformation step.")
+    # if len(sys.argv) == 4:
+    #     trajectoryFilename = sys.argv[3]
+    #     print(f"Reading trajectory file {trajectoryFilename}...")
+    #     trajectoryMatrices = readTrajectoryFile(trajectoryFilename)
+    #     print(f"Number of trajectory matrices in file: {len(trajectoryMatrices)}")
+    #     doTransform = True
+    # else:
+    #     print("No trajectory file provided, skipping transformation step.")
 
     # Initialize final point cloud list
     finalPointCloud = []
@@ -101,12 +110,14 @@ if __name__ == "__main__":
         else len(pointcloudList)
     )
 
+    print(f"Combining {len(pointcloudList)} point clouds...")
     if doTransform:
-        print("Transforming point clouds according to camera position and combining...")
-    else:
-        print("Combining point clouds...")
+        print(
+            "Transforming point clouds according to camera position before combining..."
+        )
 
     for i in range(numCloudsToProcess):
+        # for i in [0]:
         pointcloud = pointcloudList[i]
 
         if doTransform:
@@ -130,7 +141,20 @@ if __name__ == "__main__":
             print(f"Processed {percent}% of point clouds...")
     print(f"Total number of points in final point cloud: {len(finalPointCloud)}")
 
+    # Optional: Randomly sample points to reduce size
+    sampleRate = args.rate
+    print(f"Randomly sampling {int(sampleRate * 100)}% of points to reduce size...")
+    finalPointCloud = randomPointSample(finalPointCloud, sampleRate)
+    print(f"Number of points after sampling: {len(finalPointCloud)}")
+
+    # Write final point cloud to OBJ file and display
     listToObj(finalPointCloud, outputFilename)
-    pcd = open3d.geometry.PointCloud()
-    pcd.points = open3d.utility.Vector3dVector(finalPointCloud)
-    open3d.visualization.draw_geometries([pcd])
+    pcd = o3d.geometry.PointCloud()
+    # 0.732859 0.0771988 -0.679487 -1.01705
+    # -0.032094 -1.00156 -0.0467065 1.14307
+    # -0.680724 0.0955677 -0.727367 -0.912924
+    # 0.000000 0.000000 0.000000 1.000000
+    cameraPoint = [-1.01705, 1.14307, -0.912924]
+    finalPointCloud.extend([cameraPoint])
+    pcd.points = o3d.utility.Vector3dVector(finalPointCloud)
+    o3d.visualization.draw_geometries([pcd])
