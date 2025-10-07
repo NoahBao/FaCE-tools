@@ -1,10 +1,7 @@
+import argparse
 import h5py
-import os
-import sys
 import open3d as o3d
 import numpy as np
-import random
-import argparse
 
 from util import *
 
@@ -58,21 +55,8 @@ def readTrajectoryFile(filename: str) -> list[np.array]:
 
 
 if __name__ == "__main__":
-    # # Read and verify command line arguments
-    # if len(sys.argv) not in [3, 4]:
-    #     print(
-    #         "Usage: python hdf5_to_pc.py <hdf5 filename> <output obj filename> [trajectory filename]"
-    #     )
-    #     sys.exit(1)
-    # inputFilename = sys.argv[1]
-    # outputFilename = sys.argv[2]
-
-    # if not os.path.isfile(inputFilename):
-    #     print(f"File not found: {inputFilename}")
-    #     sys.exit(1)
-
-    parser = argparse.ArgumentParser(description="Converts meshes to point clouds.")
-    parser.add_argument("-i", "--input", required=True, help="input mesh file name")
+    parser = argparse.ArgumentParser(description="Converts HDF5 files to point clouds.")
+    parser.add_argument("-i", "--input", required=True, help="input hdf5 file name")
     parser.add_argument("-o", "--output", required=True, help="output obj file name")
     parser.add_argument("-t", "--trajectory", help="trajectory log file name")
     parser.add_argument(

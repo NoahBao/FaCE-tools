@@ -1,6 +1,7 @@
+import argparse
+import matplotlib.pyplot as plt
 import open3d as o3d
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 # Load the PLY files (assuming they contain point clouds)
@@ -33,8 +34,6 @@ def compare_normals(pc1, pc2):
     pc1_normals = np.asarray(pc1.normals)
     pc2_normals = np.asarray(pc2.normals)
     differences = []
-    smallPCD1 = []
-    smallPCD2 = []
 
     for i, point in enumerate(pc1.points):
         _, idx, _ = pc2_tree.search_knn_vector_3d(point, 1)
@@ -81,24 +80,38 @@ def color_code_differences_on_pcd(pcd, differences):
     return pcd
 
 
-# Load PLY files
-ply_file_1 = "meshReferences/021_color.ply"
-ply_file_2 = "faceOutput/outputFromMesh.ply"
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Compares point cloud  normal estimations against ground truth normals."
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        required=True,
+        help="input point cloud file name (must include normals)",
+    )
+    parser.add_argument(
+        "-g",
+        "--groundtruth",
+        required=True,
+        help="ground truth point cloud file name (must include normals)",
+    )
+    args = parser.parse_args()
+    # Load PLY files
+    ply_file_es = args.input  # Reference
+    ply_file_gt = args.groundtruth  # Estimates
+    pcEstimate = load_ply(ply_file_es)  # Estimates
+    pcGroundTruth = load_ply(ply_file_gt)  # Reference
 
-pcd1 = load_ply(ply_file_1)  # Reference
-pcd2 = load_ply(ply_file_2)  # Output
+    # Apply ICP
+    # not really necessary in the case that we compare points sampled
+    # from the reference mesh to the output mesh
+    # since they should already be aligned
+    aligned_pcEstimates, transformation = apply_icp(pcEstimate, pcGroundTruth)
 
-# Apply ICP
-# not really necessary in the case that we compare points sampled
-# from the reference mesh to the output mesh
-# since they should already be aligned
-aligned_pcd1, transformation = apply_icp(pcd1, pcd2)
+    print("Comparing normals...")
+    normal_differences = compare_normals(aligned_pcEstimates, pcGroundTruth)
 
-
-print("Comparing normals...")
-normal_differences = compare_normals(aligned_pcd1, pcd2)
-print("Normal differences (first 10):", normal_differences[:10])
-
-plot_normal_differences(normal_differences)
-differencePC = color_code_differences_on_pcd(pcd2, normal_differences)
-o3d.visualization.draw_geometries([differencePC], point_show_normal=False)
+    plot_normal_differences(normal_differences)
+    differencePC = color_code_differences_on_pcd(pcEstimate, normal_differences)
+    o3d.visualization.draw_geometries([differencePC], point_show_normal=False)

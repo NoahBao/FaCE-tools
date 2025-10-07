@@ -1,6 +1,6 @@
-import open3d as o3d
 import argparse
 from util import *
+import open3d as o3d
 
 
 def extract_vertices_from_mesh(file_path):
