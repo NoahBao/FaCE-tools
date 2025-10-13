@@ -1,6 +1,6 @@
-# hdf5-scan-converter
+# FaCE Tools
 
-Tool for converting HDF5 point cloud files into OBJ files.
+Various tools for obtaining inputs for FaCE and evaluating its outputs.
 
 ## Setup
 
@@ -11,7 +11,8 @@ to install all necessary Python libraries.
 
 ## Usage
 
-Run:
-`python converter.py <hdf5 filename> <output obj filename> [trajectory filename]`
+To use a script, simply run:
+`python <script_name>.py <inputs and flags>`
 
-where the HDF5 input filename and OBJ output filename are required, and the trajectory filename is optional in case each point cloud scan must be transformed according to a camera position before being combined with other scans.
+To see a detailed list of inputs and flags for each script, run:
+`python <script_name>.py -h`
