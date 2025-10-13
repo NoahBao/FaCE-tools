@@ -1,7 +1,7 @@
 import random
 
 
-def listToObj(points: list, outputFilename: str) -> None:
+def pointCloudToObj(points: list, outputFilename: str) -> None:
     """
     Takes in a Python list and writes it to a .obj file.
     """

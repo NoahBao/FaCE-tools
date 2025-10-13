@@ -51,7 +51,7 @@ if __name__ == "__main__":
     pointcloud = randomPointSample(pointcloud, sample_rate)
     print("Number of sampled vertices:", len(pointcloud))
 
-    listToObj(pointcloud, outputFilename)
+    pointCloudToObj(pointcloud, outputFilename)
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(pointcloud)
     o3d.visualization.draw_geometries([pcd])
