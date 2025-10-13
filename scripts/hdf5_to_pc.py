@@ -30,30 +30,6 @@ def h5pyToList(filename: str) -> list:
         return data
 
 
-def readTrajectoryFile(filename: str) -> list[np.array]:
-    """
-    Takes in a trajectory filename and returns the contents as a matrix list.
-    """
-    matrices = []
-    with open(filename, "r") as file:
-        lines = file.readlines()
-        # each matrix has a header line and 4 rows of data
-        # so go by 5 lines at a time
-        for fi in range(0, len(lines), 5):
-            matrixList = []
-            # go through each row
-            for r in range(1, 5):
-                line = lines[fi + r]
-                # Split the line into individual string numbers
-                str_numbers = line.split()
-                # Convert string numbers to floats and append to trajectory list
-                float_numbers = [float(num) for num in str_numbers]
-                matrixList.append(float_numbers)
-            matrix = np.array(matrixList)
-            matrices.append(matrix)
-    return matrices
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Converts HDF5 files to point clouds.")
     parser.add_argument("-i", "--input", required=True, help="input hdf5 file name")
@@ -132,8 +108,9 @@ if __name__ == "__main__":
     print(f"Number of points after sampling: {len(finalPointCloud)}")
 
     # Write final point cloud to OBJ file and display
-    listToObj(finalPointCloud, outputFilename)
+    pointCloudToObj(finalPointCloud, outputFilename)
     pcd = o3d.geometry.PointCloud()
+    # hard coding camera point in for demonstration
     # 0.732859 0.0771988 -0.679487 -1.01705
     # -0.032094 -1.00156 -0.0467065 1.14307
     # -0.680724 0.0955677 -0.727367 -0.912924
