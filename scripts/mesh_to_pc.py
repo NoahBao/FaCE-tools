@@ -9,8 +9,6 @@ def extract_vertices_from_mesh(file_path):
     """
     # Load the mesh file
     mesh = o3d.io.read_triangle_mesh(file_path)
-
-    # Check if the mesh is successfully loaded
     if not mesh.has_vertices():
         raise ValueError(
             "The mesh file does not contain any vertices or failed to load."
@@ -21,7 +19,6 @@ def extract_vertices_from_mesh(file_path):
     return vertices
 
 
-# Example usage
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Converts meshes to point clouds.")
     parser.add_argument("-i", "--input", required=True, help="input mesh file name")

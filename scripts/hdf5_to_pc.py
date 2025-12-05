@@ -53,14 +53,6 @@ if __name__ == "__main__":
 
     doTransform = False
     trajectoryMatrices = []
-    # if len(sys.argv) == 4:
-    #     trajectoryFilename = sys.argv[3]
-    #     print(f"Reading trajectory file {trajectoryFilename}...")
-    #     trajectoryMatrices = readTrajectoryFile(trajectoryFilename)
-    #     print(f"Number of trajectory matrices in file: {len(trajectoryMatrices)}")
-    #     doTransform = True
-    # else:
-    #     print("No trajectory file provided, skipping transformation step.")
 
     # Initialize final point cloud list
     finalPointCloud = []
@@ -101,7 +93,7 @@ if __name__ == "__main__":
             print(f"Processed {percent}% of point clouds...")
     print(f"Total number of points in final point cloud: {len(finalPointCloud)}")
 
-    # Optional: Randomly sample points to reduce size
+    # Optional: randomly sample points to reduce size
     sampleRate = args.rate
     print(f"Randomly sampling {int(sampleRate * 100)}% of points to reduce size...")
     finalPointCloud = randomPointSample(finalPointCloud, sampleRate)
@@ -111,10 +103,6 @@ if __name__ == "__main__":
     pointCloudToObj(finalPointCloud, outputFilename)
     pcd = o3d.geometry.PointCloud()
     # hard coding camera point in for demonstration
-    # 0.732859 0.0771988 -0.679487 -1.01705
-    # -0.032094 -1.00156 -0.0467065 1.14307
-    # -0.680724 0.0955677 -0.727367 -0.912924
-    # 0.000000 0.000000 0.000000 1.000000
     cameraPoint = [-1.01705, 1.14307, -0.912924]
     finalPointCloud.extend([cameraPoint])
     pcd.points = o3d.utility.Vector3dVector(finalPointCloud)

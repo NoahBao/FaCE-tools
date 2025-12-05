@@ -12,7 +12,6 @@ def load_ply(file_path):
 
 # Apply ICP to align two point clouds
 def apply_icp(source, target, max_iter=50, threshold=0.02):
-    # Perform ICP
     reg_icp = o3d.pipelines.registration.registration_icp(
         source,
         target,
@@ -44,7 +43,6 @@ def compare_normals(pc1, pc2):
         )
         # Compute dot product and then angle
         dot_product = np.dot(normal1, normal2)
-        # Clip dot product to avoid numerical issues (should be between -1 and 1)
         dot_product = np.clip(dot_product, -1.0, 1.0)
 
         # Compute the angle in radians
@@ -55,21 +53,12 @@ def compare_normals(pc1, pc2):
 
 
 def plot_normal_differences(differences):
-    # Plotting the histogram
     plt.figure(figsize=(8, 6))
-
-    # Create histogram with 20 bins, range from 0 to π (angles in radians)
     plt.hist(differences, bins=20, range=(0, np.pi), edgecolor="black", alpha=0.7)
-
-    # Add labels and title
     plt.xlabel("Angle Difference (radians)", fontsize=12)
     plt.ylabel("Frequency", fontsize=12)
     plt.title("Histogram of Normal Angle Differences", fontsize=14)
-
-    # Show grid
     plt.grid(True)
-
-    # Show the plot
     plt.show()
 
 
@@ -97,9 +86,10 @@ if __name__ == "__main__":
         help="ground truth point cloud file name (must include normals)",
     )
     args = parser.parse_args()
-    # Load PLY files
     ply_file_es = args.input  # Reference
     ply_file_gt = args.groundtruth  # Estimates
+
+    # Load PLY files
     pcEstimate = load_ply(ply_file_es)  # Estimates
     pcGroundTruth = load_ply(ply_file_gt)  # Reference
 

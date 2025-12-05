@@ -23,10 +23,9 @@ def generate_triangulated_obj(width, height, resolution_x, resolution_y):
         for x in range(resolution_x + 1):
             vertices.append((x * width / resolution_x, y * height / resolution_y, 0))
 
-    # Generate triangulated faces for the mesh (using two triangles for each quad)
+    # Generate triangles
     for y in range(resolution_y):
         for x in range(resolution_x):
-            # Define the four vertices of the quad
             v1 = y * (resolution_x + 1) + x + 1
             v2 = v1 + 1
             v3 = v1 + (resolution_x + 1)
@@ -38,13 +37,10 @@ def generate_triangulated_obj(width, height, resolution_x, resolution_y):
             # Second triangle (v2, v4, v3)
             faces.append((v2, v4, v3))
 
-    # Prepare OBJ format data
     obj_data = []
-
     # Adding vertices to OBJ
     for v in vertices:
         obj_data.append(f"v {v[0]} {v[1]} {v[2]}")
-
     # Adding faces to OBJ
     for f in faces:
         obj_data.append(f"f {f[0]} {f[1]} {f[2]}")
