@@ -1,4 +1,5 @@
 import os
+from textwrap import indent
 
 DIRECTORY_TREE_ROOT: str = """closed
 open
@@ -39,6 +40,7 @@ def createDirectories(root: str, directoryTree: str) -> list[str]:
     """
     Creates the input directory tree in the specified root folder. Returns a list of paths to all leaf node folders.
     """
+    prevRoot = os.path.abspath(os.curdir)
     os.chdir(root)
 
     directories = directoryTree.split("\n")
@@ -53,10 +55,16 @@ def createDirectories(root: str, directoryTree: str) -> list[str]:
         indent: int = (len(folder) - len(folderName)) // 4  # 4 spaces per indent
 
         if i > 0 and indent <= curIndent:
-            # if we're on the same level or a higher level than before,
+            # if we're on the same level or a lower level than before,
             # then the previous folder is a leaf node in the directory tree
             prevFolderName = directories[i - 1].strip()
             leafNodeFolders.append(pathStackToPath(pathStack + [prevFolderName], root))
+
+        while indent < curIndent:
+            # keep on exiting directories until curIndent matches new folder's indent
+            os.chdir("..")
+            pathStack.pop()
+            curIndent -= 1
         if i == len(directories) - 1:
             # the last line is also always a leaf node
             leafNodeFolders.append(pathStackToPath(pathStack + [folderName], root))
@@ -73,11 +81,6 @@ def createDirectories(root: str, directoryTree: str) -> list[str]:
             os.chdir(prevDir)
             pathStack.append(prevDir)
             curIndent += 1
-        while indent < curIndent:
-            # keep on exiting directories until curIndent matches new folder's indent
-            os.chdir("..")
-            pathStack.pop()
-            curIndent -= 1
 
         try:
             os.mkdir(folderName)
@@ -87,6 +90,8 @@ def createDirectories(root: str, directoryTree: str) -> list[str]:
                 pathStackToPath(pathStack + [folderName], root),
                 "already exists; skipping.",
             )
+    os.chdir(prevRoot)
+    print("Returning to previous working directory: ", prevRoot)
     return leafNodeFolders
 
 
