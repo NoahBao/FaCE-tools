@@ -1,9 +1,0 @@
-{
-    "method_paths": {
-        "WNNC": "/path/to/main_wnnc.py",
-        "DWG": "/path/to/DWG_CUDA",
-        "FaCE": "/path/to/face",
-        "DACPO": "/path/to/DACPO",
-        "SNO": "/path/to/StreamingNormalOrientation"
-    }
-}

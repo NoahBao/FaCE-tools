@@ -13,6 +13,7 @@ import json
 import subprocess
 import shlex
 import setup
+import stats
 
 # All formats should have the order of:
 # 1. executable/script
@@ -33,17 +34,37 @@ commandFormatsOpen: dict[str, str] = {
 
 
 def runMethodsOnFile(
-    commandFormats: dict[str, str], inputDir: str, inputFile: str, outputDir: str
+    inputDir: str,
+    inputFile: str,
+    outputDir: str,
+    confFile: str,
+    isClosed: bool,
 ) -> None:
-    for method in commandFormats.keys():
-        # TODO: get method executable/script path from config
-        exec = json.load(open("./scripts/experiments/conf.json"))["method_paths"][
-            method
-        ]
-        cmd = commandFormats[method] % (exec, inputDir, inputFile, outputDir)
+    methodsConf = json.load(open(confFile))["methods"]
+    for method in methodsConf.keys():
+        if methodsConf[method]["skip"] or methodsConf[method]["isClosed"] != isClosed:
+            continue
+        exec = methodsConf[method]["path"]
+        cmdFormat = methodsConf[method]["command_format"]
+        outputFile = (
+            os.path.splitext(inputFile)[0]
+            + methodsConf[method]["output_suffix"]
+            + ".ply"
+        )
+        outputArg = outputDir + outputFile if method == "FaCE" else outputDir
+
+        cmd = cmdFormat % ('"' + exec + '"', inputDir, inputFile, outputArg)
+        print("\tRunning command: ", cmd)
         cmdArgs = shlex.split(cmd)
-        print("Running command: ", cmd)
-        # proc = subprocess.run(cmdArgs)
+        proc = subprocess.run(cmdArgs)
+
+        inputFilePath = inputDir + inputFile
+        outputFilePath = outputDir + outputFile
+        # diff, flippedCount, flippedPercent = stats.compareNormalsGtEst(
+        #     inputFilePath, outputFilePath
+        # )
+        # angleDiffs[method] += [diff]
+        # flippedCounts[method] += [flippedCount]
 
 
 if __name__ == "__main__":
@@ -62,37 +83,47 @@ if __name__ == "__main__":
         required=True,
         help="root directory for all output orientation files",
     )
+    parser.add_argument(
+        "-c",
+        "--config",
+        required=True,
+        help="path to the configuration file",
+    )
     args = parser.parse_args()
     inputRoot = args.input_root
     outputRoot = args.output_root
+    configFile = args.config
     inputDirs = setup.setup(inputRoot)
     outputDirs = setup.setup(outputRoot)
+
+    angleDiffs: dict[str, list[list[float]]] = {}
+    flippedCounts: dict[str, list[float]] = {}
     for iDir, oDir in zip(inputDirs, outputDirs):
+        iDirRelative = os.path.relpath(iDir, inputRoot)  # for cleaner print statements
         isClosed = "closed" in iDir.split("/")
         isOpen = "open" in iDir.split("/")
-        methods: dict[str, str] = {}
+
         if isClosed and isOpen:
             print(
                 "Warning: directory",
-                iDir,
+                iDirRelative,
                 "is labeled as both closed and open. Skipping...",
             )
             continue
         elif not isClosed and not isOpen:
             print(
                 "Warning: directory",
-                iDir,
-                "is not labeled as closed or open. Skipping...",
+                iDirRelative,
+                "is labeled as neither closed nor open. Skipping...",
             )
             continue
         elif isClosed:
-            methods = commandFormatsClosed
-            print("Running closed surface methods for all inputs in:")
+            print("Running closed surface methods for all inputs in:", iDirRelative)
         elif isOpen:
-            methods = commandFormatsOpen
-            print("Running open surface methods for all inputs in:")
-        print(iDir)
+            print("Running open surface methods for all inputs in:", iDirRelative)
 
         for input in os.listdir(iDir):
-            print("Using input:", input)
-            runMethodsOnFile(methods, iDir, input, oDir)
+            if os.path.splitext(input)[1] != ".ply":
+                continue
+            print("\tUsing input:", input)
+            runMethodsOnFile(iDir, input, oDir, configFile, isClosed)

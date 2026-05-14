@@ -91,7 +91,6 @@ def createDirectories(root: str, directoryTree: str) -> list[str]:
                 "already exists; skipping.",
             )
     os.chdir(prevRoot)
-    print("Returning to previous working directory: ", prevRoot)
     return leafNodeFolders
 
 

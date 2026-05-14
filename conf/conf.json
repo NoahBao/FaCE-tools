@@ -1,0 +1,47 @@
+{
+    "_executablePathComment": "Executable/script path should be specified as absolute path in config.",
+    "_formatComment": "All formats should have the order of: 1. executable/script 2. input directory 3. input file 4. output directory.",
+    "methods": {
+        "WNNC": {
+            "name": "WNNC",
+            "path": "/path/to/main_wnnc.py",
+            "command_format": "python %s --input %s --output %s",
+            "output_suffix": "_wnnc",
+            "isClosed": true,
+            "skip": true
+        },
+        "DWG": {
+            "name": "DWG",
+            "path": "/path/to/DWG_CUDA",
+            "command_format": "%s --in_path %s --in_name %s --out_path %s",
+            "output_suffix": "_dwg",
+            "isClosed": true,
+            "skip": true
+        },
+        "FaCE": {
+            "name": "FaCE",
+            "temp": "/path/to/face",
+            "path": "/Users/noahbarnes/Documents/Documents - Noah’s MacBook Air/BU/Gap Year/Lab Work/Surface Reconstruction/faraday-tet-private/build/example",
+            "command_format": "%s %s%s --h --o %s --i",
+            "output_suffix": "_face",
+            "isClosed": true,
+            "skip": false
+        },
+        "DACPO": {
+            "name": "DACPO",
+            "path": "/path/to/DACPO",
+            "command_format": "%s --input_data_root %s --in %s --out %s --ipsr_type 2 --config_folder conf/default/",
+            "output_suffix": "_dacpo",
+            "isClosed": false,
+            "skip": true
+        },
+        "SNO": {
+            "name": "SNO",
+            "path": "/path/to/StreamingNormalOrientation",
+            "command_format": "%s %s%s --out %s -prepare -estimateNormals -r 0.05 -stream",
+            "output_suffix": "_sno",
+            "isClosed": false,
+            "skip": true
+        }
+    }
+}

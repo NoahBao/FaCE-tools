@@ -4,14 +4,12 @@ import fileSystem as fs
 
 
 def setup(root: str) -> list[str]:
-    print("Creating input directories with following tree:")
-    fs.printDirectoryTrees()
+    # print("Creating input directories with following tree:")
+    # fs.printDirectoryTrees()
 
     if not root.endswith("/"):
         root += "/"
-    print(os.path.abspath(os.path.curdir))
     leaves = fs.createDirectories(root, fs.DIRECTORY_TREE_ROOT)
-    print(os.path.abspath(os.path.curdir))
     finalLeaves = []
     while len(leaves) > 0:
         newLeaves = []
